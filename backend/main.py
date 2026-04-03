@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import settings
 from core.models import init_db
+from routers import alerts, camera, feedback
 
 logging.basicConfig(
     level=logging.INFO,
@@ -34,6 +35,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(alerts.router)
+app.include_router(camera.router)
+app.include_router(feedback.router)
+
 
 @app.get("/health")
 async def health():
