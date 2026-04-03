@@ -1,10 +1,21 @@
 from __future__ import annotations
 from typing import Optional
 from datetime import datetime
+from enum import Enum
 
 from sqlalchemy import String, Float, JSON, DateTime, Text, Integer
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+
+
+# Enums
+
+class SeverityLevel(str, Enum):
+    CRITICAL = "critical"
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
 
 
 # SQLAlchemy ORM models
