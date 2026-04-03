@@ -1,0 +1,62 @@
+from __future__ import annotations
+from typing import Optional
+from datetime import datetime
+
+from sqlalchemy import String, Float, JSON, DateTime, Text, Integer
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+
+
+# SQLAlchemy ORM models
+
+class Base(DeclarativeBase):
+    pass
+
+
+class AlertRecord(Base):
+    __tablename__ = "alerts"
+
+    alert_id: Mapped[str] = mapped_column(String, primary_key=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime)
+    severity: Mapped[str] = mapped_column(String)
+    category: Mapped[str] = mapped_column(String)
+    title: Mapped[str] = mapped_column(String)
+    description: Mapped[str] = mapped_column(Text)
+    evidence: Mapped[list] = mapped_column(JSON)
+    recommended_actions: Mapped[list] = mapped_column(JSON)
+    contributing_agents: Mapped[list] = mapped_column(JSON)
+    confidence: Mapped[float] = mapped_column(Float)
+    location: Mapped[str] = mapped_column(String)
+    status: Mapped[str] = mapped_column(String, default="active")
+    camera_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    frame_snapshot: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+
+class FeedbackRecord(Base):
+    __tablename__ = "feedback"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    alert_id: Mapped[str] = mapped_column(String)
+    outcome: Mapped[str] = mapped_column(String)
+    officer_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+# Database lifecycle
+
+_engine = None
+_session_factory = None
+
+
+async def init_db(database_url: str) -> None:
+    global _engine, _session_factory
+    _engine = create_async_engine(database_url, echo=False)
+    _session_factory = async_sessionmaker(_engine, expire_on_commit=False)
+    async with _engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+
+def get_session() -> AsyncSession:
+    if _session_factory is None:
+        raise RuntimeError("Database not initialised — call init_db() first.")
+    return _session_factory()
