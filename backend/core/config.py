@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     claude_model: str = "claude-sonnet-4-6"
     database_url: str = "sqlite+aiosqlite:///./security.db"
+    frame_analysis_interval: int = 3   # frames between vision analyses per camera
+    alert_cooldown: int = 30           # seconds before the same threat can re-alert
     cors_origins: List[str] = [
         "http://localhost:5173",
         "http://localhost:3000",
